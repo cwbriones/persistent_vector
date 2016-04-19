@@ -70,4 +70,15 @@ defmodule PersistentVector do
   end
 
   def from_list(list), do: Enum.reduce(list, new, &(append(&2, &1)))
+
+  def to_list(vector = %__MODULE__{root: root, shift: shift}) do
+    to_list_priv(root, shift) |> Enum.take(vector.size)
+  end
+
+  def to_list_priv(nil, level), do: []
+  def to_list_priv(node, 0), do: Tuple.to_list(node)
+  def to_list_priv(node, level) do
+    Tuple.to_list(node)
+    |> Enum.flat_map(&to_list_priv(&1, level - @bits))
+  end
 end

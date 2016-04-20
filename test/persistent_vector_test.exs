@@ -23,4 +23,28 @@ defmodule PersistentVectorTest do
 
     assert list == Enum.to_list(0..99)
   end
+
+  test "you can access elements" do
+    vector = 0..99
+    |> Enum.to_list
+    |> PersistentVector.from_list
+
+    for i <- 0..99 do
+      assert i == PersistentVector.get(vector, i)
+    end
+  end
+
+  test "you can set elements" do
+    vector = 0..99
+    |> Enum.to_list
+    |> PersistentVector.from_list
+
+    updated = Enum.reduce(0..99, vector, fn i, acc ->
+      PersistentVector.set(acc, i, i * 2)
+    end) |> PersistentVector.to_list
+
+    expected = Enum.map(0..99, &(&1 * 2))
+
+    assert updated == expected
+  end
 end

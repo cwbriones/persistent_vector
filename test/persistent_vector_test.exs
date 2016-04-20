@@ -8,7 +8,7 @@ defmodule PersistentVectorTest do
   end
 
   test "it can be created from a list" do
-    vector = 0..99 |> Enum.to_list |> PersistentVector.from_list
+    vector = 0..99 |> Enum.into(PersistentVector.new)
     assert vector.size == 100
     for i <- 0..99 do
       assert PersistentVector.get(vector, i) == i
@@ -17,17 +17,14 @@ defmodule PersistentVectorTest do
 
   test "it can be turned into a list" do
     list = 0..99
-    |> Enum.to_list
-    |> PersistentVector.from_list
+    |> Enum.into(PersistentVector.new)
     |> PersistentVector.to_list
 
     assert list == Enum.to_list(0..99)
   end
 
   test "you can access elements" do
-    vector = 0..99
-    |> Enum.to_list
-    |> PersistentVector.from_list
+    vector = 0..99 |> Enum.into(PersistentVector.new)
 
     for i <- 0..99 do
       assert i == PersistentVector.get(vector, i)
@@ -35,9 +32,7 @@ defmodule PersistentVectorTest do
   end
 
   test "you can set elements" do
-    vector = 0..99
-    |> Enum.to_list
-    |> PersistentVector.from_list
+    vector = 0..99 |> Enum.into(PersistentVector.new)
 
     updated = Enum.reduce(0..99, vector, fn i, acc ->
       PersistentVector.set(acc, i, i * 2)

@@ -129,3 +129,13 @@ defmodule PersistentVector do
     Tuple.duplicate(nil, @width) |> put_elem(0, value)
   end
 end
+
+defimpl Collectable, for: PersistentVector do
+  def into(original) do
+    {original, fn
+      acc, {:cont, v} -> PersistentVector.append(acc, v)
+      acc, :done -> acc
+      _, :halt -> :ok
+    end}
+  end
+end

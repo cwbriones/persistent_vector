@@ -36,11 +36,6 @@ defmodule PersistentVector do
     end
     def get(node, key, _), do: elem(node, band(key, @mask))
 
-    def set(nil, _, value, level) do
-      Enum.reduce(0..div(level, @bits), value, fn _, acc ->
-        Node.new(acc)
-      end)
-    end
     def set(node, key, value, level) when level > 0 do
       idx = band(key >>> level, @mask)
       child = elem(node, idx)
@@ -98,27 +93,29 @@ defmodule PersistentVector do
     %__MODULE__{vector | tail: tail, tail_offset: offset, size: size + 1}
   end
   def append(vector = %__MODULE__{
+    tail: tail,
+    root: root,
+    shift: shift,
+    size: size}, value) when size - @width == @width <<< shift do
+    new_shift = shift + @bits
+    new_root = Node.insert(Node.new(root), size - @width, tail, new_shift)
+    %__MODULE__{vector |
+      root: new_root,
+      tail: Node.new(value),
+      tail_offset: size,
+      shift: new_shift,
+      size: size + 1}
+  end
+  def append(vector = %__MODULE__{
     root: root,
     tail: tail,
     shift: shift,
     size: size}, value) do
 
-    capacity = @width <<< shift
-
-    {new_root, new_shift} = case size - @width do
-      ^capacity ->
-        {Node.new(root), shift + @bits}
-      _ -> {root, shift}
-    end
-
-    new_root = Node.insert(new_root, size - @width, tail, new_shift)
-    tail = Node.new(value)
-
     %__MODULE__{vector |
-      root: new_root,
-      tail: tail,
+      root: Node.insert(root, size - @width, tail, shift),
+      tail: Node.new(value),
       tail_offset: size,
-      shift: new_shift,
       size: size + 1}
   end
 
